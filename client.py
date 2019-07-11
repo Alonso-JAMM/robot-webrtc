@@ -14,7 +14,7 @@ peer_connections = set()
 # Socketio client that will connect to the server in order to initiate webrtc connections
 socket_client = socketio.AsyncClient()
 # Socket url
-URL = 'http://localhost:8082'
+URL = 'http://10.0.0.5:8082'
 
 loop = asyncio.get_event_loop()
 
@@ -26,10 +26,11 @@ class PeerConnection:
         self.remote_id = remote_id
         self.pc = RTCPeerConnection()
         # Test if video file exists, if not, then set default green frames
-        if os.path.isfile(os.path.join(ROOT, 'robot.mp4')):
-            self.pc.addTrack(MediaPlayer(os.path.join(ROOT, 'robot.mp4')).video)
-        else:
-            self.pc.addTrack(VideoStreamTrack())
+        self.pc.addTrack(MediaPlayer('/dev/video0').video)
+        # if os.path.isfile(os.path.join(ROOT, 'robot.mp4')):
+        #     self.pc.addTrack(MediaPlayer(os.path.join(ROOT, 'robot.mp4')).video)
+        # else:
+        #     self.pc.addTrack(VideoStreamTrack())
 
     async def answer(self, msg):
         # Setting up the remote session (the caller's information)
