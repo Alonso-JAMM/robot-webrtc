@@ -31,11 +31,11 @@ class PeerConnection:
         self.remote_id = remote_id
         self.pc = RTCPeerConnection()
         # Test if video file exists, if not, then set default green frames
-        self.pc.addTrack(MediaPlayer('/dev/video0',format="v4l2", options=options).video)
+        # self.pc.addTrack(MediaPlayer('/dev/video0',format="v4l2", options=options).video)
         # if os.path.isfile(os.path.join(ROOT, 'robot.mp4')):
         #     self.pc.addTrack(MediaPlayer(os.path.join(ROOT, 'robot.mp4')).video)
         # else:
-        #     self.pc.addTrack(VideoStreamTrack())
+        self.pc.addTrack(VideoStreamTrack())
 
     async def answer(self, msg):
         # Setting up the remote session (the caller's information)
