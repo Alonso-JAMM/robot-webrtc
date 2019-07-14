@@ -19,8 +19,8 @@ URL = 'http://10.0.0.5:8082'
 loop = asyncio.get_event_loop()
 
 options = {
-    "framerate": "30",
-    "video_size": "640x480"
+    "framerate": "15",
+    "video_size": "320x180"
 }
 
 
@@ -31,9 +31,8 @@ class PeerConnection:
         self.remote_id = remote_id
         self.pc = RTCPeerConnection()
         # Test if video file exists, if not, then set default green frames
-        # self.pc.addTrack(MediaPlayer('/dev/video0',format="v4l2", options=options).video)
-        # if os.path.isfile(os.path.join(ROOT, 'robot.mp4')):
-        #     self.pc.addTrack(MediaPlayer(os.path.join(ROOT, 'robot.mp4')).video)
+        if os.path.isfile('/dev/video0'):
+            self.pc.addTrack(MediaPlayer('/dev/video0', format="v4l2", options=options).video)
         # else:
         self.pc.addTrack(VideoStreamTrack())
 
