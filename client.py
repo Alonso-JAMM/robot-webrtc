@@ -32,7 +32,7 @@ class PeerConnection:
         self.remote_id = remote_id
         self.pc = RTCPeerConnection()
         # Test if video file exists, if not, then set default green frames
-        if os.path.isfile('/dev/video0'):
+        if exists('/dev/video0'):
             self.pc.addTrack(MediaPlayer('/dev/video0', format="v4l2", options=options).video)
         else:
             self.pc.addTrack(VideoStreamTrack())
@@ -198,6 +198,14 @@ async def run():
     await socket_client.connect(URL)
 
     await socket_client.wait()
+
+
+def exists(path):
+    try:
+        os.stat(path)
+    except OSError:
+        return False
+    return True
 
 
 if __name__ == '__main__':
