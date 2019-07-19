@@ -3,8 +3,9 @@ import asyncio
 import os
 import logging
 import logging.config
-from aiortc import RTCPeerConnection, sdp, VideoStreamTrack, RTCSessionDescription
+from aiortc import RTCPeerConnection, sdp, VideoStreamTrack, RTCSessionDescription, RTCRtpSender
 from aiortc.contrib.media import MediaPlayer
+from Arduino_controller import ArduinoSerial
 
 
 # Root directory of file, useful for sending back mp4 files
@@ -19,7 +20,7 @@ URL = 'http://10.0.0.5:8082'
 loop = asyncio.get_event_loop()
 
 options = {
-    "framerate": "15",
+    "framerate": "20",
     "video_size": "320x180"
 }
 
@@ -33,8 +34,12 @@ class PeerConnection:
         # Test if video file exists, if not, then set default green frames
         if os.path.isfile('/dev/video0'):
             self.pc.addTrack(MediaPlayer('/dev/video0', format="v4l2", options=options).video)
-        # else:
-        self.pc.addTrack(VideoStreamTrack())
+        else:
+            self.pc.addTrack(VideoStreamTrack())
+
+        # Changes to h264
+        capabilities = RTCRtpSender.getCapabilities('video')
+        print(capabilities.codecs)
 
     async def answer(self, msg):
         # Setting up the remote session (the caller's information)
@@ -137,6 +142,11 @@ async def connect():
 @socket_client.event
 async def move(msg):
     """Movement messages received by the caller to control the bot"""
+    data = {
+        "motor1": 140,
+        "motor2": 140
+    }
+    arduino.write(data)
     print(msg)
 
 
@@ -196,4 +206,7 @@ if __name__ == '__main__':
         'disable_existing_loggers': True,
     })
     logging.basicConfig(level=logging.DEBUG)
+    arduino = ArduinoSerial('/dev/ttyACM0', 9600)
     loop.run_until_complete(run())
+
+
