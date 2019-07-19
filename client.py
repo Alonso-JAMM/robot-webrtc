@@ -5,7 +5,7 @@ import logging
 import logging.config
 from aiortc import RTCPeerConnection, sdp, VideoStreamTrack, RTCSessionDescription, RTCRtpSender
 from aiortc.contrib.media import MediaPlayer
-from Arduino_controller import ArduinoSerial
+#from Arduino_controller import ArduinoSerial
 
 
 # Root directory of file, useful for sending back mp4 files
@@ -39,7 +39,8 @@ class PeerConnection:
 
         # Changes to h264
         capabilities = RTCRtpSender.getCapabilities('video')
-        print(capabilities.codecs)
+        preferences = list(filter(lambda x: x.mimeType == 'video/H264', capabilities.codecs))
+        print(preferences)
 
     async def answer(self, msg):
         # Setting up the remote session (the caller's information)
@@ -146,7 +147,7 @@ async def move(msg):
         "motor1": 140,
         "motor2": 140
     }
-    arduino.write(data)
+    #arduino.write(data)
     print(msg)
 
 
@@ -214,7 +215,7 @@ if __name__ == '__main__':
         'disable_existing_loggers': True,
     })
     logging.basicConfig(level=logging.DEBUG)
-    arduino = ArduinoSerial('/dev/ttyACM0', 9600)
+    #arduino = ArduinoSerial('/dev/ttyACM0', 9600)
     loop.run_until_complete(run())
 
 
