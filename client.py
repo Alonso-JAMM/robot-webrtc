@@ -5,7 +5,7 @@ import logging
 import logging.config
 from aiortc import RTCPeerConnection, sdp, VideoStreamTrack, RTCSessionDescription, RTCRtpSender
 from aiortc.contrib.media import MediaPlayer
-#from Arduino_controller import ArduinoSerial
+from Arduino_controller import ArduinoSerial
 
 
 # Root directory of file, useful for sending back mp4 files
@@ -20,7 +20,7 @@ URL = 'http://10.0.0.5:8082'
 loop = asyncio.get_event_loop()
 
 options = {
-    "framerate": "20",
+    "framerate": "30",
     "video_size": "320x180"
 }
 
@@ -37,7 +37,7 @@ class PeerConnection:
         else:
             self.pc.addTrack(VideoStreamTrack())
 
-        # Changes to h264
+        # Changes to h264, it improves performance
         capabilities = RTCRtpSender.getCapabilities('video')
         preferences = list(filter(lambda x: x.mimeType == 'video/H264', capabilities.codecs))
         transceiver = self.pc.getTransceivers()[0]
@@ -148,7 +148,7 @@ async def move(msg):
         "motor1": 140,
         "motor2": 140
     }
-    #arduino.write(data)
+    arduino.write(data)
     print(msg)
 
 
@@ -198,7 +198,6 @@ async def still_alive_cb(msg):
 
 async def run():
     await socket_client.connect(URL)
-
     await socket_client.wait()
 
 
@@ -216,7 +215,7 @@ if __name__ == '__main__':
         'disable_existing_loggers': True,
     })
     logging.basicConfig(level=logging.DEBUG)
-    #arduino = ArduinoSerial('/dev/ttyACM0', 9600)
+    arduino = ArduinoSerial('/dev/ttyACM0', 9600)
     loop.run_until_complete(run())
 
 
