@@ -40,7 +40,8 @@ class PeerConnection:
         # Changes to h264
         capabilities = RTCRtpSender.getCapabilities('video')
         preferences = list(filter(lambda x: x.mimeType == 'video/H264', capabilities.codecs))
-        print(preferences)
+        transceiver = self.pc.getTransceivers()[0]
+        transceiver.setCodecPreferences(preferences)
 
     async def answer(self, msg):
         # Setting up the remote session (the caller's information)
