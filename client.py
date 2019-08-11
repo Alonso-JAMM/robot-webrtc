@@ -21,7 +21,7 @@ loop = asyncio.get_event_loop()
 
 options = {
     "framerate": "30",
-    "video_size": "320x180"
+    "video_size": "320x192",
 }
 
 
@@ -149,8 +149,14 @@ async def move(msg):
         "motor2": 140
     }
     arduino.write(data)
-    print(msg)
+    arduino.read()
 
+
+@socket_client.event
+async def message(msg):
+    """Data received that includes movement and other actions for the bot"""
+    for command in msg:
+        data = command
 
 async def authentication():
     """Authentication for the server is needed in order to join rooms"""
@@ -215,7 +221,7 @@ if __name__ == '__main__':
         'disable_existing_loggers': True,
     })
     logging.basicConfig(level=logging.DEBUG)
-    arduino = ArduinoSerial('/dev/ttyACM0', 9600)
+    arduino = ArduinoSerial('/dev/ttyACM0', 19200)
     loop.run_until_complete(run())
 
 

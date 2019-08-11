@@ -5,7 +5,7 @@ import time
 
 class ArduinoSerial:
     """Class to connect to the arduino """
-    def __init__(self, device, baud_rate):
+    def __init__(self, device, baud_rate, timeout=0.05):
         # Opens serial connection
         self.connection = serial.Serial(device, baud_rate)
         # Sleeps a little bit since the arduino restarts after beginning serial connection and we need to
@@ -34,19 +34,17 @@ class ArduinoSerial:
 
 if __name__ == '__main__':
     device = '/dev/ttyACM0'
-    baud_rate = 9600
+    baud_rate = 19200
     arduino = ArduinoSerial(device, baud_rate)
-    # data_to_send = {
-    #     'motor1': 160,
-    #     'motor2': 150
-    # }
-    # arduino.write(data_to_send)
-    for x in range(256):
-        data_to_send = {
-            'motor1': x,
-            'motor2': x
-        }
-        arduino.write(data_to_send)
-        time.sleep(0.05)
+    data = "<B?>"
+    start_time = time.time()
+
+    i = 0
+    while (i < 500):
+        arduino.write("<M -255 -255>")
+        arduino.read()
+        print(arduino.read())
+        time.sleep(0.050)
+
     arduino.stop()
 
