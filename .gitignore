@@ -6,3 +6,4 @@ __pycache__
 *.log
 tests/
 message_test.py
+easyrtc_client/__pycache__
