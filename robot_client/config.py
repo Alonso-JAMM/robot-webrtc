@@ -15,7 +15,8 @@ socketio_options = {
 # Devices used by the application
 devices = {
     "camera": "/dev/video0",
-    "arduino": "/dev/ttyACM0"
+    "arduino": "/dev/ttyACM0",
+    "ardduino_baud_rate": "19200"
 
 }
 

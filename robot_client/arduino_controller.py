@@ -8,6 +8,7 @@ URL = 'http://10.0.0.5:8082'
 socket_client = socketio.AsyncClient()
 loop = asyncio.get_event_loop()
 
+
 class ArduinoSerial:
     """Class to connect to the arduino """
     def __init__(self, device, baud_rate, timeout=0.05):

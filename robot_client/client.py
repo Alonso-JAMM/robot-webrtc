@@ -5,7 +5,7 @@ import logging
 import logging.config
 from aiortc import RTCPeerConnection, sdp, VideoStreamTrack, RTCSessionDescription, RTCRtpSender
 from aiortc.contrib.media import MediaPlayer
-from robot_client.Arduino_controller import ArduinoSerial
+from robot_client.arduino_controller import ArduinoSerial
 import json
 
 # Root directory of file, useful for sending back mp4 files

@@ -1,7 +1,7 @@
 import socketio
 import asyncio
 import logging
-# import json
+import json
 from aiortc import sdp
 from robot_client.peer_connection import peer_connections
 from robot_client.peer_connection import PeerConnection
@@ -12,12 +12,13 @@ log = logging.getLogger("main.easy")
 
 class ClientNameSpace(socketio.AsyncClientNamespace):
     """ This class has all the socketio events for the client. """
-    def __init__(self, name="bot1"):
+    def __init__(self, name="bot1", arduino=None):
         super().__init__()
         # pc (Peer Connection) is an object passed to the classs in order to make
         # Note that pc is not required since in some cases it is only needed to be in the room
         self.pc = None
         self.name = name
+        self.arduino = arduino              # Arduino object that will be used to read and write to it
 
     async def on_connect(self):
         log.info("Connected to the server!")
@@ -90,7 +91,28 @@ class ClientNameSpace(socketio.AsyncClientNamespace):
 
     async def on_move(self, msg):
         if self.name == "listener":
-            print(msg)
+            data_json = """{ 
+                   "M": [
+                       "255",
+                       "255"
+                       ],
+                   "L1": [
+                       "255"
+                       ],
+                   "L2": [
+                       "0"
+                       ]
+                   }"""
+            msg = json.loads(data_json)
+            for command in msg:
+                data = "<" + command
+                for parameter in msg[command]:
+                    data = data + " " + parameter
+                data = data + ">"
+                self.arduino.write(data)
+                self.arduino.read()
+                self.arduino.write(data)
+                self.arduino.read()
 
     async def auth_callback(self, msg):
         # Callback function for the authentication process

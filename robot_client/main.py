@@ -3,6 +3,7 @@ import asyncio
 import threading
 from robot_client import config
 from robot_client.socketio_client import SocketClient, ClientNameSpace
+from robot_client.arduino_controller import ArduinoSerial
 
 # Setting up the logger of the application
 logger = logging.getLogger("main")
@@ -26,6 +27,7 @@ fh.setFormatter(formatter)
 def arduino_connection():
     """Here, we connect to the socketio server as a listener that is only interested in data that will control the
         arduino"""
+    # Connecting to the arduino
     # creating a loop for the thread
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -61,4 +63,7 @@ def main():
 
 
 if __name__ == "__main__":
+    device = config.devices["arduino"]
+    baud_rate = config.devices["ardduino_baud_rate"]
+    arduino = ArduinoSerial(device, baud_rate)
     main()
