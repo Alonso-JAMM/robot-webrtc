@@ -21,11 +21,6 @@ class PeerConnection:
             self.pc.addTrack(MediaPlayer(config.devices["camera"], format="v4l2", options=config.video_options).video)
         else:
             self.pc.addTrack(VideoStreamTrack())
-        # Changes to h264 encoding, which has better performance than the default vpx
-        capabilities = RTCRtpSender.getCapabilities("video")
-        preferences = list(filter(lambda x: x.mimeType == "video/H264", capabilities.codecs))
-        transceiver = self.pc.getTransceivers()[0]
-        transceiver.setCodecPreferences(preferences)
 
     async def answer(self, msg):
         # Setting up the remote session (the caller's information)
