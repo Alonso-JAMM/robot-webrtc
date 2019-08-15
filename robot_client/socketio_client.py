@@ -3,8 +3,8 @@ import asyncio
 import logging
 # import json
 from aiortc import sdp
-from robot_client.peerconnection import peer_connections
-from robot_client.peerconnection import PeerConnection
+from robot_client.peer_connection import peer_connections
+from robot_client.peer_connection import PeerConnection
 
 # child logger
 log = logging.getLogger("main.easy")
