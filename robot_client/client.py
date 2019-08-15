@@ -5,8 +5,8 @@ import logging
 import logging.config
 from aiortc import RTCPeerConnection, sdp, VideoStreamTrack, RTCSessionDescription, RTCRtpSender
 from aiortc.contrib.media import MediaPlayer
-from Arduino_controller import ArduinoSerial
-
+from robot_client.Arduino_controller import ArduinoSerial
+import json
 
 # Root directory of file, useful for sending back mp4 files
 ROOT = os.path.dirname(__file__)
@@ -144,12 +144,28 @@ async def connect():
 @socket_client.event
 async def move(msg):
     """Movement messages received by the caller to control the bot"""
-    data = {
-        "motor1": 140,
-        "motor2": 140
-    }
-    arduino.write(data)
-    arduino.read()
+    data_json = """{ 
+        "M": [
+            "255",
+            "255"
+            ],
+        "L1": [
+            "255"
+            ],
+        "L2": [
+            "0"
+            ]
+        }"""
+    msg = json.loads(data_json)
+    for command in msg:
+        data = "<" + command
+        for parameter in msg[command]:
+            data = data + " " + parameter
+        data = data + ">"
+        arduino.write(data)
+        arduino.read()
+        arduino.write(data)
+        arduino.read()
 
 
 @socket_client.event
@@ -221,7 +237,7 @@ if __name__ == '__main__':
         'disable_existing_loggers': True,
     })
     logging.basicConfig(level=logging.DEBUG)
-    arduino = ArduinoSerial('/dev/ttyACM0', 19200)
+    arduino = ArduinoSerial('/dev/ttyACM0', 19200, timeout=0.015)
     loop.run_until_complete(run())
 
 

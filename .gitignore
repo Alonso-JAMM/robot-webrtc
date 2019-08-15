@@ -2,3 +2,7 @@ venv/
 .idea/
 *.mp4
 __pycache__
+.coverage
+*.log
+tests/
+message_test.py
