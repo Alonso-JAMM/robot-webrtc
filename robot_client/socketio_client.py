@@ -91,7 +91,7 @@ class ClientNameSpace(socketio.AsyncClientNamespace):
             for command in commands:
                 data = "<" + command
                 for parameter in msg[command]:
-                    data = data + " " + parameter
+                    data = data + " " + msg[command][parameter]
                 data = data + ">"
                 self.arduino.write(data)
                 self.arduino.read()
