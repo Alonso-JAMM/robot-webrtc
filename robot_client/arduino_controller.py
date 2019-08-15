@@ -1,19 +1,13 @@
 import serial
 import json
 import time
-import socketio
-import asyncio
-
-URL = 'http://10.0.0.5:8082'
-socket_client = socketio.AsyncClient()
-loop = asyncio.get_event_loop()
 
 
 class ArduinoSerial:
     """Class to connect to the arduino """
-    def __init__(self, device, baud_rate, timeout=0.05):
+    def __init__(self, device, baud_rate, timeout=0.015):
         # Opens serial connection
-        self.connection = serial.Serial(device, baud_rate)
+        self.connection = serial.Serial(device, baud_rate, timeout=timeout)
         # Sleeps a little bit since the arduino restarts after beginning serial connection and we need to
         # wait a little bit in order for it to read data sent
         time.sleep(2)
@@ -38,15 +32,11 @@ class ArduinoSerial:
             self.connection.close()
 
 
-async def run():
-    await socket_client.connect(URL)
-    await socket_client.wait()
-
-
 if __name__ == '__main__':
     device = '/dev/ttyACM0'
-    baud_rate = 19200
+    baud_rate = 38400
     arduino = ArduinoSerial(device, baud_rate)
-
-    loop.run_until_complete(run())
-    # arduino.stop()
+    arduino.write("<M 255 255>")
+    a = arduino.read()
+    print(a)
+    arduino.stop()

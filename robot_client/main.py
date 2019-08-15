@@ -32,7 +32,7 @@ def arduino_connection():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     logger.info("Initiating arduino stuff")
-    my_namespace = ClientNameSpace(name="listener")
+    my_namespace = ClientNameSpace(name="listener", arduino=arduino)
     my_client = SocketClient(namespace=my_namespace)
     asyncio.run(my_client.connect(config.socketio_options["URL"]))
 

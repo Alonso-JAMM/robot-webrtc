@@ -87,30 +87,12 @@ class ClientNameSpace(socketio.AsyncClientNamespace):
     async def on_message(self, msg):
         """Data received that includes movement and other actions for the bot"""
         if self.name == "listener":
-            print(msg)
-
-    async def on_move(self, msg):
-        if self.name == "listener":
-            data_json = """{ 
-                   "M": [
-                       "255",
-                       "255"
-                       ],
-                   "L1": [
-                       "255"
-                       ],
-                   "L2": [
-                       "0"
-                       ]
-                   }"""
-            msg = json.loads(data_json)
-            for command in msg:
+            commands = json.loads(msg)
+            for command in commands:
                 data = "<" + command
                 for parameter in msg[command]:
                     data = data + " " + parameter
                 data = data + ">"
-                self.arduino.write(data)
-                self.arduino.read()
                 self.arduino.write(data)
                 self.arduino.read()
 
