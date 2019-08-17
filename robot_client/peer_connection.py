@@ -17,8 +17,8 @@ class PeerConnection:
         self.remote_id = remote_id
         self.pc = RTCPeerConnection()
         # Test if video file exists, if not, then set default green frames
-        if exists(config.devices["camera"]):
-            self.pc.addTrack(MediaPlayer(config.devices["camera"], format="v4l2", options=config.video_options).video)
+        if exists(config.devices["camera"]["location"]):
+            self.pc.addTrack(MediaPlayer(config.devices["camera"]["location"], format="v4l2", options=config.video_options).video)
         else:
             self.pc.addTrack(VideoStreamTrack())
 

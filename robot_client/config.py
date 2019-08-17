@@ -14,10 +14,14 @@ socketio_options = {
 
 # Devices used by the application
 devices = {
-    "camera": "/dev/video0",
-    "arduino": "/dev/ttyACM0",
-    "ardduino_baud_rate": "38400"
-
+    "camera": {
+        "location": "/dev/video0"
+    },
+    "arduino": {
+        "location": "/dev/ttyACM0",
+        "baud_rate": "38400",
+        "read_timeout": "0.02"
+    }
 }
 
 # Configuration used by the logger of the application
@@ -25,3 +29,4 @@ logging_config = {
     "level": logging.DEBUG,
     "filename": "example.log"
 }
+

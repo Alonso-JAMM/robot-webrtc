@@ -1,10 +1,13 @@
-import socketio
 import asyncio
 import logging
 import json
+import time
+import re
+import socketio
 from aiortc import sdp
 from robot_client.peer_connection import peer_connections
 from robot_client.peer_connection import PeerConnection
+from robot_client.peer_connection import config
 
 # child logger
 log = logging.getLogger("main.easy")
@@ -87,14 +90,34 @@ class ClientNameSpace(socketio.AsyncClientNamespace):
     async def on_message(self, msg):
         """Data received that includes movement and other actions for the bot"""
         if self.name == "listener":
-            commands = json.loads(msg)
-            for command in commands:
-                data = "<" + command
-                for parameter in msg[command]:
-                    data = data + " " + msg[command][parameter]
-                data = data + ">"
-                self.arduino.write(data)
-                self.arduino.read()
+            message = json.loads(msg)
+            if message["to"] == "arduino":
+                commands = message["commands"]
+                for command in commands:
+                    data = "<" + str(command)
+                    for parameter in commands[command]:
+                        data = data + " " + str(commands[command][parameter])
+                    data = data + ">"
+                    self.arduino.write(data)
+                    first_time = time.time()
+                    while True:
+                        # Read all the messages coming and removes \r\n endings as well as <> symbols
+                        response = self.arduino.read().decode("utf-8")
+                        response = re.sub("[<>]", "", response.rstrip())
+                        time_passed = time.time() - first_time
+                        if response == "OK" or time_passed > float(config.devices["arduino"]["read_timeout"]):
+                            break
+                        elif response != "":
+                            # If both conditions are false, it means that the message received is meant to be sent
+                            # back to the controller
+                            words = response.split(' ')          # First word is command and second one is data
+                            msg_to_send = {"to": "controller",
+                                           "commands": {
+                                               words[0]: words[1]
+                                               }
+                                           }
+                            msg_to_send_json = json.dumps(msg_to_send)
+                            await self.emit('message', msg_to_send_json)
 
     async def auth_callback(self, msg):
         # Callback function for the authentication process

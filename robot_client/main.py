@@ -63,7 +63,7 @@ def main():
 
 
 if __name__ == "__main__":
-    device = config.devices["arduino"]
-    baud_rate = config.devices["ardduino_baud_rate"]
+    device = config.devices["arduino"]["location"]
+    baud_rate = config.devices["arduino"]["baud_rate"]
     arduino = ArduinoSerial(device, baud_rate)
     main()
