@@ -2,7 +2,6 @@ import logging
 import asyncio
 import threading
 from robot_client import config
-from robot_client.socketio_client import SocketClient, ClientNameSpace
 from robot_client.arduino_controller import ArduinoSerial
 
 # Setting up the logger of the application
@@ -32,9 +31,11 @@ def arduino_connection():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     logger.info("Initiating arduino stuff")
-    my_namespace = ClientNameSpace(name="listener", arduino=arduino)
-    my_client = SocketClient(namespace=my_namespace)
-    asyncio.run(my_client.connect(config.socketio_options["URL"]))
+    #TODO Create a Data Channel connection to send and receive data if possible
+    
+    #my_namespace = ClientNameSpace(name="listener", arduino=arduino)
+    #my_client = SocketClient(namespace=my_namespace)
+    #asyncio.run(my_client.connect(config.socketio_options["URL"]))
 
 
 def camera_connection():
@@ -44,15 +45,18 @@ def camera_connection():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     logger.info("Initiating camera stuff")
-    my_namespace = ClientNameSpace(name="bot1")
-    my_client = SocketClient(namespace=my_namespace)
-    asyncio.run(my_client.connect(config.socketio_options["URL"]))
+    #TODO create a webrtc connection to Janus server
+    
+    #my_namespace = ClientNameSpace(name="bot1")
+    #my_client = SocketClient(namespace=my_namespace)
+    #asyncio.run(my_client.connect(config.socketio_options["URL"]))
 
 
 def main():
     logger.info("Logging level " + str(logger.handlers[0].level))
     logger.info("The application has been initiated")
-    logger.info("Now trying to connect to the socket.io server")
+    #TODO change from socketio to Janus server
+    #logger.info("Now trying to connect to the socket.io server")
 
     # Setting up the threads
     arduino_thread = threading.Thread(target=arduino_connection)

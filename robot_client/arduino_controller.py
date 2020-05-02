@@ -10,10 +10,12 @@ class ArduinoSerial:
         self.connection = serial.Serial(device, baud_rate, timeout=timeout)
         # Sleeps a little bit since the arduino restarts after beginning serial connection and we need to
         # wait a little bit in order for it to read data sent
+        
         time.sleep(2)
 
     def write(self, msg):
         # converts the object msg into a string to be sent
+        #TODO may need to change from json to another format since Data channels will be used
         data = json.dumps(msg)
         if self.connection.isOpen():
             # Send the json message in ascii format
