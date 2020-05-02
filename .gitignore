@@ -8,3 +8,5 @@ tests/
 message_test.py
 easyrtc_client/__pycache__
 *.egg-info
+build/*
+dist/*

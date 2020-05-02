@@ -2,7 +2,7 @@ import logging
 import asyncio
 import threading
 from robot_client import config
-from robot_client.arduino_controller import ArduinoSerial
+#from robot_client.arduino_controller import ArduinoSerial
 
 # Setting up the logger of the application
 logger = logging.getLogger("main")
@@ -59,15 +59,15 @@ def main():
     #logger.info("Now trying to connect to the socket.io server")
 
     # Setting up the threads
-    arduino_thread = threading.Thread(target=arduino_connection)
+    #arduino_thread = threading.Thread(target=arduino_connection)
     camera_thread = threading.Thread(target=camera_connection)
     # Starting the threads
-    arduino_thread.start()
+    #arduino_thread.start()
     camera_thread.start()
 
 
 if __name__ == "__main__":
     device = config.devices["arduino"]["location"]
     baud_rate = config.devices["arduino"]["baud_rate"]
-    arduino = ArduinoSerial(device, baud_rate)
+    #arduino = ArduinoSerial(device, baud_rate)
     main()
