@@ -9,7 +9,9 @@ video_options = {
 
 # janus options used to connect to the server
 janus_options = {
-    "URL": "http://10.0.0.5:8082"
+    "URL": "http://10.0.0.5:8082",
+    "room_video": 1234,
+    "room_text": 1234
 }
 
 # Devices used by the application
