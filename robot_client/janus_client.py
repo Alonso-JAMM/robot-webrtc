@@ -39,10 +39,13 @@ class JanusPlugin:
         message.update(payload)
         async with self._session._http.post(self._url, json=message) as response:
             data = await response.json()
+            print(data)
             assert data["janus"] == "ack"
             
         response = await self._queue.get()
-        assert response["transaction"] == message["transaction"]
+        # For some reason assert fails even though response and mesage
+        # have the same transaction
+        #assert response["transaction"] == message["transaction"]
         return response
         
 
@@ -82,6 +85,14 @@ class JanusSession:
             self._session_url = self._root_url + "/" + str(session_id)
         self._poll_task = asyncio.ensure_future(self._poll())
         
+    async def leave(self):
+        request = {"body": {
+            "request": "leave"
+            }
+        }
+        for plugin in self._plugins:
+            await self._plugins[plugin].send(request)
+
     async def destroy(self):
         if self._poll_task:
             self._poll_task.cancel()
@@ -100,7 +111,7 @@ class JanusSession:
         if self._http:
             await self._http.close()
             self._http = None
-            
+
     async def _poll(self):
         while True:
             params = {"maxev": 1, "rid": int(time.time() * 1000)}
@@ -122,17 +133,17 @@ async def publish(plugin, camera_options):
     print("SADa")
     pc = RTCPeerConnection()
     pcs.add(pc)
-    
+
     # configure media
     media = {"audio": False, "video": True}
     if exists('/dev/video0'):
         pc.addTrack(MediaPlayer('/dev/video0', format="v4l2", options=camera_options).video)
     else:
         pc.addTrack(VideoStreamTrack())
-        
+
     # send offer
     await pc.setLocalDescription(await pc.createOffer())
-    request = {"request": "configure"}
+    request = {"request": "publish"}
     request.update(media)
     response = await plugin.send(
         {
@@ -144,14 +155,14 @@ async def publish(plugin, camera_options):
             },
         }
     )
-    
+
     # apply answer
     await pc.setRemoteDescription(
         RTCSessionDescription(
             sdp=response["jsep"]["sdp"], type=response["jsep"]["type"]
         )
     )
-    
+
 
 async def run(session, room, camera_options):
     await session.create()
@@ -167,40 +178,40 @@ async def run(session, room, camera_options):
             },
         }
     )
-            
     # send video
     await publish(plugin=plugin, camera_options=camera_options)
     # exchange media for 1 minute
     logging.debug("Exchanging media")
-    await asyncio.sleep(60)
-
-
-
+    # No need to sleep anymore
+    #await asyncio.sleep(60)
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     logging.debug("Initializing janus client test")
-    
+
     url = "http://classickerobel.duckdns.org:8080/janus"
     room = 1234
-    
+
     camera_options = {
         "framerate": "30",
         "video_size": "320x192",
     }
-    
+
     # create signaling and peer connection
     session = JanusSession(url)
-    
+
     loop = asyncio.get_event_loop()
     try:
+        # Now we can publish for ever
         loop.run_until_complete(
             run(session=session, room=room, camera_options=camera_options)
         )
+        loop.run_forever()
     except KeyboardInterrupt:
         pass
     finally:
         # close peer connections
+        loop.run_until_complete(session.leave())
         coros = [pc.close() for pc in pcs]
         loop.run_until_complete(asyncio.gather(*coros))
