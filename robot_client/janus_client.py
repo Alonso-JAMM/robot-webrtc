@@ -39,7 +39,6 @@ class JanusPlugin:
         message.update(payload)
         async with self._session._http.post(self._url, json=message) as response:
             data = await response.json()
-            print(data)
             assert data["janus"] == "ack"
             
         response = await self._queue.get()
@@ -47,7 +46,6 @@ class JanusPlugin:
         # have the same transaction
         #assert response["transaction"] == message["transaction"]
         return response
-        
 
 
 class JanusSession:
@@ -92,6 +90,8 @@ class JanusSession:
         }
         for plugin in self._plugins:
             await self._plugins[plugin].send(request)
+        for pc in pcs:
+            await pc.close()
 
     async def destroy(self):
         if self._poll_task:
@@ -130,7 +130,6 @@ async def publish(plugin, camera_options):
     """
     Send video to the room.
     """
-    print("SADa")
     pc = RTCPeerConnection()
     pcs.add(pc)
 
@@ -164,7 +163,7 @@ async def publish(plugin, camera_options):
     )
 
 
-async def run(session, room, camera_options):
+async def camera_stream(session, room, camera_options):
     await session.create()
     # join video room
     plugin = await session.attach("janus.plugin.videoroom")
@@ -186,6 +185,12 @@ async def run(session, room, camera_options):
     #await asyncio.sleep(60)
 
 
+async def messages(session, room):
+    await session.create()
+    # join text room
+    plugin = await session.attach("janu")
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     logging.debug("Initializing janus client test")
@@ -205,7 +210,7 @@ if __name__ == "__main__":
     try:
         # Now we can publish for ever
         loop.run_until_complete(
-            run(session=session, room=room, camera_options=camera_options)
+            camera_stream(session=session, room=room, camera_options=camera_options)
         )
         loop.run_forever()
     except KeyboardInterrupt:
@@ -213,5 +218,3 @@ if __name__ == "__main__":
     finally:
         # close peer connections
         loop.run_until_complete(session.leave())
-        coros = [pc.close() for pc in pcs]
-        loop.run_until_complete(asyncio.gather(*coros))
