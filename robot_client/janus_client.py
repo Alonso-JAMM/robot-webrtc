@@ -190,7 +190,7 @@ class TextClient:
         Connects to the text room
         """
         await self.session.create()
-        self.plugin = await session.attach("janus.plugin.textroom")
+        self.plugin = await self.session.attach("janus.plugin.textroom")
         
         pc = RTCPeerConnection()
         pcs.add(pc)
