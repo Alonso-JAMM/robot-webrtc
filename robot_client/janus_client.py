@@ -85,17 +85,6 @@ class JanusSession:
             session_id = data["data"]["id"]
             self._session_url = self._root_url + "/" + str(session_id)
         self._poll_task = asyncio.ensure_future(self._poll())
-        
-    # It doesn't work for different Janus plugins
-    #async def leave(self):
-        #request = {"body": {
-            #"request": "leave"
-            #}
-        #}
-        #for plugin in self._plugins:
-            #await self._plugins[plugin].send(request)
-        #for pc in pcs:
-            #await pc.close()
 
     async def destroy(self):
         if self._poll_task:
