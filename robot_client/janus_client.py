@@ -6,6 +6,8 @@ import aiohttp
 import string
 import time
 import os
+import json
+
 
 from aiortc import RTCPeerConnection, RTCSessionDescription, VideoStreamTrack
 from aiortc.contrib.media import MediaPlayer
@@ -39,7 +41,8 @@ class JanusPlugin:
         message.update(payload)
         async with self._session._http.post(self._url, json=message) as response:
             data = await response.json()
-            assert data["janus"] == "ack"
+            # Text room does not return "ack" when joined
+            #assert data["janus"] == "ack"
             
         response = await self._queue.get()
         # For some reason assert fails even though response and mesage
@@ -83,15 +86,16 @@ class JanusSession:
             self._session_url = self._root_url + "/" + str(session_id)
         self._poll_task = asyncio.ensure_future(self._poll())
         
-    async def leave(self):
-        request = {"body": {
-            "request": "leave"
-            }
-        }
-        for plugin in self._plugins:
-            await self._plugins[plugin].send(request)
-        for pc in pcs:
-            await pc.close()
+    # It doesn't work for different Janus plugins
+    #async def leave(self):
+        #request = {"body": {
+            #"request": "leave"
+            #}
+        #}
+        #for plugin in self._plugins:
+            #await self._plugins[plugin].send(request)
+        #for pc in pcs:
+            #await pc.close()
 
     async def destroy(self):
         if self._poll_task:
@@ -185,10 +189,73 @@ async def camera_stream(session, room, camera_options):
     #await asyncio.sleep(60)
 
 
-async def messages(session, room):
-    await session.create()
-    # join text room
-    plugin = await session.attach("janu")
+class TextClient:
+    def __init__(self, session, room):
+        self.session = session
+        self.room = room    # Janus room to connect
+        self.plugin = None
+        self.channel = None
+        
+    async def create(self):
+        """
+        Connects to the text room
+        """
+        await self.session.create()
+        self.plugin = await session.attach("janus.plugin.textroom")
+        
+        pc = RTCPeerConnection()
+        pcs.add(pc)
+        
+        self.channel = pc.createDataChannel("JanusDataChannel")
+        self.channel.on("open", self.join_room)
+        self.channel.on("message", self.reader)
+        
+        # Initializing Peer Connection
+        request = {"request": "setup"}
+        response = await self.plugin.send(
+            {
+                "body": request,
+            }
+        )
+        await pc.setRemoteDescription(
+            RTCSessionDescription(
+                sdp=response["jsep"]["sdp"], type=response["jsep"]["type"]
+            )
+        )
+        await pc.setLocalDescription(await pc.createAnswer())
+        answer = {"request": "ack"}
+        await self.plugin.send(
+            {
+                "body": answer,
+                "jsep":{
+                    "sdp": pc.localDescription.sdp,
+                    "trickle": False,
+                    "type": pc.localDescription.type,
+                },
+            }
+        )
+
+    
+    def join_room(self):
+        """
+        First message sent to the room using Data Channel. This is the part 
+        that interfaces with the Arduino
+        """
+        data = {
+            "textroom": "join",
+            "transaction": transaction_id(),
+            "room": self.room,
+            "username": transaction_id(),
+            "display": "bot1"
+        }
+        self.channel.send(json.dumps(data))
+    
+    def reader(self, data):
+        """
+        Reads mesages posted on the data channel
+        """
+        print(data)
+        
 
 
 if __name__ == "__main__":
@@ -205,16 +272,24 @@ if __name__ == "__main__":
 
     # create signaling and peer connection
     session = JanusSession(url)
-
+    
+    text_room = TextClient(session, room)
+    
+    
     loop = asyncio.get_event_loop()
     try:
         # Now we can publish for ever
         loop.run_until_complete(
             camera_stream(session=session, room=room, camera_options=camera_options)
         )
+        loop.run_until_complete(
+            text_room.create()
+        )
         loop.run_forever()
     except KeyboardInterrupt:
         pass
     finally:
         # close peer connections
-        loop.run_until_complete(session.leave())
+        loop.run_until_complete(session.destroy())
+        coros = [pc.close() for pc in pcs]
+        loop.run_until_complete(asyncio.gather(*coros))
