@@ -16,10 +16,10 @@ class ArduinoSerial:
     def write(self, msg):
         # converts the object msg into a string to be sent
         #TODO may need to change from json to another format since Data channels will be used
-        data = json.dumps(msg)
+        #data = json.dumps(msg)
         if self.connection.isOpen():
             # Send the json message in ascii format
-            self.connection.write(data.encode('ascii'))
+            self.connection.write(msg.encode('ascii'))
 
     def read(self):
         # Reads data from the serial connection

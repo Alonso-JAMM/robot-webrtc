@@ -8,9 +8,12 @@ import time
 import os
 import json
 
-
 from aiortc import RTCPeerConnection, RTCSessionDescription, VideoStreamTrack
 from aiortc.contrib.media import MediaPlayer
+
+from robot_client.arduino_controller import ArduinoSerial
+from robot_client import config
+
 
 pcs = set()
 
@@ -184,6 +187,12 @@ class TextClient:
         self.room = room    # Janus room to connect
         self.plugin = None
         self.channel = None
+        location = config.devices["arduino"]["location"]
+        baud_rate = config.devices["arduino"]["baud_rate"]
+        read_timeout = config.devices["arduino"]["read_timeout"]
+        # Serial connection to the arduino
+        self.arduino = ArduinoSerial(device=location, baud_rate=baud_rate,
+                                     timeout=read_timeout)
         
     async def create(self):
         """
@@ -243,7 +252,14 @@ class TextClient:
         """
         Reads mesages posted on the data channel
         """
-        print(data)
+        msg = json.loads(data)
+
+        if "text" in msg:
+            # most of the text commands go directly to the arduino,
+            # in the future some commands may not need to go to the
+            # arduino so we may need to differentiate them
+            self.arduino.write(msg["text"])
+            print(msg["text"])
         
 
 
