@@ -8,7 +8,7 @@ av==8.0.1
 cffi==1.14.0
 chardet==3.0.4
 crc32c==2.0
-cryptography==2.9.2
+cryptography==3.2
 idna==2.9
 multidict==4.7.5
 netifaces==0.10.9
