@@ -1,4 +1,4 @@
-aiohttp==3.6.2
+aiohttp==3.7.4
 aioice==0.6.18
 aiortc==0.9.28
 asn1crypto==1.3.0
